@@ -1,5 +1,6 @@
 import os
 import json
+import re
 def get_json_files(path):
     directory_path = path
 
@@ -67,7 +68,7 @@ def extract_text_from_all_json_files(file_path_list):
         # insere o path a partir do nome para obter o arquivo correspondente
         with open(path) as f:
             data = json.load(f)
-        # executa o metodo para extrair os textos de cada um dos arquivos json da lista
+        # executa o metodo para extrair os textos e bounds de cada um dos arquivos json da lista
         text_elements = extract_text_elements(data)
         # adiciona o texto encontrado em cada arquivo json ao vetor de texto
         for text in text_elements:
@@ -75,6 +76,49 @@ def extract_text_from_all_json_files(file_path_list):
             if text["text"] != "":
                 text_list_per_file.append(text["text"])
         texts_list.append(text_list_per_file)
-    return texts_list
+    # pega a lista de textos de cada json e enumera para servir como rotulo
+    text_dict = {i: item for i, item in enumerate(texts_list)}
+    return text_dict
+    
 
-print(extract_text_from_all_json_files(get_json_files('data')))
+#print(extract_text_from_all_json_files(get_json_files('data')))
+
+def extract_bounds_from_all_json_files(file_path_list):
+    bounds_list = []
+    # loop para percorrer toda a lista de nomes de arquivos
+    for path in file_path_list:
+        bounds_list_per_file = []
+        # insere o path a partir do nome para obter o arquivo correspondente
+        with open(path) as f:
+            data = json.load(f)
+        # executa o metodo para extrair os textos e bounds de cada um dos arquivos json da lista
+        text_elements = extract_text_elements(data)
+        # adiciona o bound encontrado em cada arquivo json ao vetor de bound
+        for bound in text_elements:
+            # se não for valor vazio ele adiciona setando somente a propriedade de text
+            if bound["text"] != "":
+                bounds_list_per_file.append(bound["bounds"])
+        bounds_list.append(bounds_list_per_file)
+    return bounds_list
+
+#print(extract_bounds_from_all_json_files(get_json_files('data')))
+
+
+def process_text_dict(text_dict):
+    processed_dict = {}
+    for key, value in text_dict.items():
+        if isinstance(value, list):
+            # Join the list elements into a single string
+            value = ' '.join(value)
+        # Coloca todas as letras em minúsculas
+        value = str(value).lower()
+        # Separa as palavras
+        words = re.findall(r'\w+', value)
+        # Remove os caracteres especiais
+        processed_words = [re.sub(r'[^a-zA-Z0-9]', '', word) for word in words]
+        # Remove as palavras vazias
+        processed_words = [word for word in processed_words if word]
+        processed_dict[key] = processed_words
+    return processed_dict
+
+print(process_text_dict(extract_text_from_all_json_files(get_json_files('data'))))
