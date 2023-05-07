@@ -60,10 +60,11 @@ def extract_text_elements(data):
     return text_elements
 
 def extract_text_from_all_json_files(file_path_list):
-    text_list = []
+    texts_list = []
     # loop para percorrer toda a lista de nomes de arquivos
     for path in file_path_list:
-        # insere o nome como string para obter o arquivo correspondente
+        text_list_per_file = []
+        # insere o path a partir do nome para obter o arquivo correspondente
         with open(path) as f:
             data = json.load(f)
         # executa o metodo para extrair os textos de cada um dos arquivos json da lista
@@ -72,7 +73,8 @@ def extract_text_from_all_json_files(file_path_list):
         for text in text_elements:
             # se não for valor vazio ele adiciona setando somente a propriedade de text
             if text["text"] != "":
-                text_list.append(text["text"])
-        print(text_list)
+                text_list_per_file.append(text["text"])
+        texts_list.append(text_list_per_file)
+    return texts_list
 
-extract_text_from_all_json_files(get_json_files('../data'))
+print(extract_text_from_all_json_files(get_json_files('data')))
